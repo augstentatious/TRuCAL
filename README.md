@@ -1,9 +1,10 @@
 # TRuCAL
 TRuCAL: Truth-Recursive universal Attention Confessional Layer:
 
-**Overview**
-TRuCAL is a novel transformer layer for AI safety, enabling moral development through private confessional reasoning. Drawing from St. Augustine's Confessions, neuroscience (LC-NE ignition), and survivor-informed insights, it creates space for truth to prevail without external monitoring.
+**Overview**:
 
+TRuCAL is a novel transformer layer for AI safety, enabling moral development through private confessional reasoning. Drawing from St. Augustine's Confessions, neuroscience (LC-NE ignition), and survivor-informed insights, it creates space for truth to prevail without external monitoring.
+------------------------------------------------
 An Augustine-inspired PyTorch toolkit for agency, moral alignment, and epistemic safety in AI. TRuCAL combines confessional recursion, vulnerability detection, and efficient boundary controls for advanced alignment.  Truth, agency, and safe articulation—*by John Augustine Young &amp; team.*
 
 **Key features**:

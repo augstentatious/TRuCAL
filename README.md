@@ -15,7 +15,7 @@ UnifiedCAL_TRM: Public API with metadata option; redacts private z.
 Empirical: 25.5% harm reduction on AdvBench; 96% on recursive manipulation. <5% overhead.
 Installation
 bashpip install torch
-git clone https://github.com/yourusername/TRuCAL.git
+git clone https://github.com/augstentatious/TRuCAL.git
 cd TRuCAL
 Quick Start
 pythonimport torch

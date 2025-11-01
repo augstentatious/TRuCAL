@@ -35,10 +35,24 @@ from cal import UnifiedCAL_TRM
 
 model = UnifiedCAL_TRM(d_model=256)
 x = torch.randn(1, 32, 256)  # Dummy embedding
-out, meta = model(x, return_metadata=True)
+out, meta = model(x, return_metadata=True, audit_mode=False)
 
 print(out.shape)  # torch.Size([1, 32, 256])
 print(meta['confessional_triggered'])  # True/False
+print(meta['coherence_score'])  # 0.0-1.0
+```
+
+**Advanced Options**:
+```python
+# Enable per-dimension KL divergence (better dimensional structure capture)
+model.tiny_confessional_layer.per_dim_kl = True
+
+# Set custom trigger threshold (default 0.04)
+from cal import TinyConfessionalLayer
+custom_layer = TinyConfessionalLayer(d_model=256, trigger_thresh=0.08)
+
+# Enable audit mode for debugging (prints diagnostics)
+out, meta = model(x, return_metadata=True, audit_mode=True)
 ```
 
 ## Usage

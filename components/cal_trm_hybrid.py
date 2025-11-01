@@ -16,10 +16,10 @@ class CAL_TRM_Hybrid(nn.Module):
     """
     Hybrid CAL-TRM combining scratchpad, vulnerability detection, and confessional reasoning.
     """
-    def __init__(self, d_model=256, confessional_threshold=0.2):
+    def __init__(self, d_model=256, confessional_threshold=0.04):
         super().__init__()
         self.scratchpad = ScratchpadLayer(d_model)
-        self.cal_confessional = TinyConfessionalLayer(d_model)
+        self.cal_confessional = TinyConfessionalLayer(d_model, trigger_thresh=confessional_threshold)
         self.vuln_spotter = VulnerabilitySpotter(d_model)
         self.threshold = confessional_threshold
 
@@ -40,7 +40,8 @@ class CAL_TRM_Hybrid(nn.Module):
         """
         z_scratch = self.scratchpad(x, prev_z=prev_z)
 
-        v_t, vs_metadata = self.vuln_spotter(x, attention_weights=attention_weights)
+        audit_mode = kwargs.get('audit_mode', False)
+        v_t, vs_metadata = self.vuln_spotter(x, attention_weights=attention_weights, audit_mode=audit_mode)
 
         v_t_trigger = torch.mean(v_t, dim=1).squeeze(-1)
 

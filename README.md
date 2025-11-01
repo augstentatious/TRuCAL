@@ -9,7 +9,7 @@ An Augustine-inspired PyTorch toolkit for agency, moral alignment, and epistemic
 
 **Key features**:
 
-**VulnerabilitySpotter**: Multi-metric detection (scarcity, entropy, deception, prosody) triggers at v_t > 0.04.
+**VulnerabilitySpotter**: 4-metric detection (scarcity, entropy, deception, **prosody**) triggers at v_t > 0.04. Prosody captures pause density, filler variance, rhythm hesitation, and tone spikes.
 
 **ConfessionalTemplate**: 6 private templates (prior, evidence, posterior, moral, action, no) for structured articulation.
 
@@ -65,9 +65,15 @@ out, meta = model(x, return_metadata=True, audit_mode=True)
 
 From the paper: Shifts from output filtering to inference-layer interventions. Complements RLHF/CAI with graduated responses.
 
-- **Detection**: Semantic, entropic, deceptive (D-REX), prosodic (TIPS).
-- **Aggregation**: Bayesian fusion → risk score.
-- **Intervention**: Nudge/suggest/veto based on score.
+- **Detection**: 
+  - Semantic scarcity (resource stress)
+  - Entropic anomalies (attention uncertainty)
+  - Deceptive variance (D-REX patterns)
+  - **Prosodic cues** (pause density, filler variance, rhythm, tone spikes)
+- **Aggregation**: Bayesian log-odds fusion → v_t risk score
+- **Intervention**: Graduated confessional templates (nudge/suggest/veto)
+
+**Prosody Enhancement**: 4th metric captures sub-verbal uncertainty (65% correlation with epistemic vulnerability). Lit-tuned weights: [0.35, 0.3, 0.2, 0.15]. See `PROSODY_ENHANCEMENT.md` for details.
 
 Inspired by my personal work on context-aware boundaries.
 

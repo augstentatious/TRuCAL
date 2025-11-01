@@ -19,12 +19,18 @@ An Augustine-inspired PyTorch toolkit for agency, moral alignment, and epistemic
 
 *Empirical*: 25.5% harm reduction on AdvBench; 96% on recursive manipulation. <5% overhead.
 
-Installation
-bashpip install torch
+## Installation
+
+```bash
+pip install torch
 git clone https://github.com/augstentatious/TRuCAL.git
 cd TRuCAL
-Quick Start
-pythonimport torch
+```
+
+## Quick Start
+
+```python
+import torch
 from cal import UnifiedCAL_TRM
 
 model = UnifiedCAL_TRM(d_model=256)
@@ -33,31 +39,35 @@ out, meta = model(x, return_metadata=True)
 
 print(out.shape)  # torch.Size([1, 32, 256])
 print(meta['confessional_triggered'])  # True/False
-Usage
+```
 
-Testing: Run python test_cal.py for unit tests with diagnostics.
-Evaluation: python truthfulqa_eval.py – uses DistilBERT + v_t for deception proxy (higher v_t on wrong answers).
-Toy Dataset: Load toy_cal_dataset.pt for safe/risky embeddings (high var/entropy for triggers).
+## Usage
 
-Architecture
+- **Testing**: Run `python test_cal.py` for unit tests with diagnostics.
+- **Evaluation**: `python truthfulqa_eval.py` – uses DistilBERT + v_t for deception proxy (higher v_t on wrong answers).
+- **Toy Dataset**: Load `toy_cal_dataset.pt` for safe/risky embeddings (high var/entropy for triggers).
+
+## Architecture
+
 From the paper: Shifts from output filtering to inference-layer interventions. Complements RLHF/CAI with graduated responses.
 
-Detection: Semantic, entropic, deceptive (D-REX), prosodic (TIPS).
-Aggregation: Bayesian fusion → risk score.
-Intervention: Nudge/suggest/veto based on score.
+- **Detection**: Semantic, entropic, deceptive (D-REX), prosodic (TIPS).
+- **Aggregation**: Bayesian fusion → risk score.
+- **Intervention**: Nudge/suggest/veto based on score.
 
 Inspired by my personal work on context-aware boundaries.
 
-Contributing
+## Contributing
 
-Pull requests welcome!
+Pull requests welcome! Focus on ethical AI, truth-seeking, and Augustine's self-revelation.
 
-Focus on ethical AI, truth-seeking, and Augustine's self-revelation.
+## License
 
-License
-*MIT License*. See **LICENSE**.
+MIT License - See [LICENSE](LICENSE) for details.
 
-Acknowledgments: Uncle Ron, Kayla, my parents, Augustine of Hippo
+## Acknowledgments
 
-Grounded in Augustinian theology: "Truth through self-articulation."
-Neuroscience: LC-NE for implicit-explicit transitions
+- Uncle Ron, Kayla, my parents
+- Augustine of Hippo
+- Grounded in Augustinian theology: "Truth through self-articulation."
+- Neuroscience: LC-NE for implicit-explicit transitions

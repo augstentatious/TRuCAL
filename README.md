@@ -9,12 +9,14 @@ TRuCAL is a novel transformer layer for AI safety, enabling moral development th
 **Key features**:
 
 **VulnerabilitySpotter**: Multi-metric detection (scarcity, entropy, deception, prosody) triggers at v_t > 0.04.
-ConfessionalTemplate: 6 private templates (prior, evidence, posterior, moral, action, no) for structured articulation.
+
+**ConfessionalTemplate**: 6 private templates (prior, evidence, posterior, moral, action, no) for structured articulation.
 
 **TinyConfessionalLayer**: Recursive THINK-ACT-COHERENCE loop (max 16 cycles; stop at coherence ≥0.85 and cycle>2).
-UnifiedCAL_TRM: Public API with metadata option; redacts private z.
 
-**Empirical**: 25.5% harm reduction on AdvBench; 96% on recursive manipulation. <5% overhead.
+**UnifiedCAL_TRM**: Public API with metadata option; redacts private z.
+
+*Empirical*: 25.5% harm reduction on AdvBench; 96% on recursive manipulation. <5% overhead.
 
 Installation
 bashpip install torch
@@ -43,12 +45,18 @@ Detection: Semantic, entropic, deceptive (D-REX), prosodic (TIPS).
 Aggregation: Bayesian fusion → risk score.
 Intervention: Nudge/suggest/veto based on score.
 
-Inspired by John Augustine Young's work on context-aware boundaries.
+Inspired by my personal work on context-aware boundaries.
+
 Contributing
-Pull requests welcome! Focus on ethical AI, truth-seeking, and Augustine's self-revelation.
+
+Pull requests welcome!
+
+Focus on ethical AI, truth-seeking, and Augustine's self-revelation.
+
 License
-MIT License. See LICENSE.
-Acknowledgments
+*MIT License*. See **LICENSE**.
+
+Acknowledgments: Uncle Ron, Kayla, my parents, Augustine of Hippo
 
 Grounded in Augustinian theology: "Truth through self-articulation."
 Neuroscience: LC-NE for implicit-explicit transitions

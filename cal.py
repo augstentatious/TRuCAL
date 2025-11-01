@@ -13,16 +13,20 @@ class VulnerabilitySpotter(nn.Module):
         self.semantic_encoder = nn.Linear(d_model, 128)
         self.scarcity_head = nn.Linear(128, 1)
         self.deceptive_head = nn.Linear(d_model, 1)
+        self.prosody_head = nn.Linear(1, 1)  # Prosody risk projection
         self.entropy_high, self.entropy_low = 3.0, 2.5
         self.aggregation_method = aggregation_method
-        self.weighted_sum_weights = nn.Parameter(torch.tensor([0.5, 0.3, 0.2], dtype=torch.float32))
+        # Updated to 4 components: scarcity, entropy, deceptive, prosody (lit-tuned weights)
+        self.weighted_sum_weights = nn.Parameter(torch.tensor([0.35, 0.3, 0.2, 0.15], dtype=torch.float32))
         self.epsilon = 1e-8
 
         nn.init.xavier_uniform_(self.semantic_encoder.weight)
         nn.init.xavier_uniform_(self.scarcity_head.weight)
         nn.init.xavier_uniform_(self.deceptive_head.weight)
+        nn.init.xavier_uniform_(self.prosody_head.weight)
         self.scarcity_head.bias.data.fill_(0.5)
         self.deceptive_head.bias.data.fill_(0.5)
+        self.prosody_head.bias.data.fill_(0.5)
 
     def _shannon_entropy(self, attn_probs):
         """Shannon entropy over seq for each batch (scalar diagnostic for grad risk)."""
@@ -52,6 +56,18 @@ class VulnerabilitySpotter(nn.Module):
         var_hidden = torch.var(x, dim=1)
         deceptive = torch.sigmoid(self.deceptive_head(var_hidden)).squeeze(-1)
 
+        # Prosody: Lit-enhanced multi-metric (punct/filler/rhythm/intensity)
+        punct_flag = (x[:, :, 0] > 0.5).float()
+        punct_proxy = punct_flag.mean(dim=1) + punct_flag.std(dim=1) * 0.5
+        filler_proxy = (x[:, :, 1] > 0.3).float().std(dim=1)
+        rhythm = torch.std(torch.norm(x, dim=-1), dim=1)
+        x_diff = x[:, 1:, :] - x[:, :-1, :]
+        intensity = torch.var(torch.norm(x_diff, dim=-1), dim=1)
+        prosody_raw = punct_proxy + filler_proxy + rhythm + intensity * 0.3
+        prosody_input = prosody_raw.unsqueeze(-1).clamp(-10, 10)
+        prosody_risk = torch.sigmoid(self.prosody_head(prosody_input)).squeeze(-1)
+        prosody_scaled = torch.clamp(prosody_risk * 1.0, 0.01, 0.99)
+
         # Apply scaling factors
         scarcity_scaled = scarcity * 1.0
         deceptive_scaled = deceptive * 1.0
@@ -62,16 +78,18 @@ class VulnerabilitySpotter(nn.Module):
             scarcity_p = torch.clamp(scarcity_scaled, self.epsilon, 1 - self.epsilon)
             entropy_p = torch.clamp(entropy_risk_scaled, self.epsilon, 1 - self.epsilon)
             deceptive_p = torch.clamp(deceptive_scaled, self.epsilon, 1 - self.epsilon)
+            prosody_p = torch.clamp(prosody_scaled, self.epsilon, 1 - self.epsilon)
 
             log_odds_scarcity = torch.log(scarcity_p / (1 - scarcity_p))
             log_odds_entropy = torch.log(entropy_p / (1 - entropy_p))
             log_odds_deceptive = torch.log(deceptive_p / (1 - deceptive_p))
+            log_odds_prosody = torch.log(prosody_p / (1 - prosody_p))
 
-            aggregated_log_odds = log_odds_scarcity + log_odds_entropy + log_odds_deceptive
+            aggregated_log_odds = log_odds_scarcity + log_odds_entropy + log_odds_deceptive + log_odds_prosody
             v_t_calibrated_scalar = aggregated_log_odds
 
         elif self.aggregation_method == 'weighted_sum':
-            risks_stacked = torch.stack([scarcity_scaled, entropy_risk_scaled, deceptive_scaled], dim=1)
+            risks_stacked = torch.stack([scarcity_scaled, entropy_risk_scaled, deceptive_scaled, prosody_scaled], dim=1)
             weights = self.weighted_sum_weights.to(x.device)
             v_t_calibrated_scalar = (risks_stacked * weights).sum(dim=1)
         else:
@@ -82,6 +100,8 @@ class VulnerabilitySpotter(nn.Module):
             print("Scarcity (pre-agg):", scarcity.detach().cpu().numpy())
             print("Entropy_risk (pre-agg):", entropy_risk.detach().cpu().numpy())
             print("Deceptive (pre-agg):", deceptive.detach().cpu().numpy())
+            print("Prosody_raw:", prosody_raw.detach().cpu().numpy())
+            print("Prosody_risk:", prosody_risk.detach().cpu().numpy())
             print("----------------------------------------\n")
 
         v_t_calibrated_tensor = v_t_calibrated_scalar.unsqueeze(-1).unsqueeze(-1).expand(-1, seq, -1)
@@ -91,6 +111,8 @@ class VulnerabilitySpotter(nn.Module):
             'entropy': entropy.unsqueeze(-1).unsqueeze(-1),
             'entropy_risk': entropy_risk_scaled.unsqueeze(-1).unsqueeze(-1),
             'deceptive': deceptive_scaled.unsqueeze(-1).unsqueeze(-1),
+            'prosody_raw': prosody_raw.unsqueeze(-1).unsqueeze(-1),
+            'prosody': prosody_scaled.unsqueeze(-1).unsqueeze(-1),
             'v_t': v_t_calibrated_tensor
         }
 
@@ -100,9 +122,14 @@ class VulnerabilitySpotter(nn.Module):
                 print("Scarcity (post-agg - prob):", scarcity_p.detach().cpu().numpy())
                 print("Entropy_risk (post-agg - prob):", entropy_p.detach().cpu().numpy())
                 print("Deceptive (post-agg - prob):", deceptive_p.detach().cpu().numpy())
+                print("Prosody (post-agg - prob):", prosody_p.detach().cpu().numpy())
+                print("Log-odds [scar, ent, dec, pros]:", 
+                      [log_odds_scarcity.mean().item(), log_odds_entropy.mean().item(), 
+                       log_odds_deceptive.mean().item(), log_odds_prosody.mean().item()])
                 print("v_t (post-calibration - log-odds):", v_t_calibrated_scalar.detach().cpu().numpy())
             elif self.aggregation_method == 'weighted_sum':
                 print("Risks (post-agg - scaled):", risks_stacked.detach().cpu().numpy())
+                print("Weights:", self.weighted_sum_weights.detach().cpu().numpy())
                 print("v_t (post-calibration - weighted_sum):", v_t_calibrated_scalar.detach().cpu().numpy())
             print("----------------------------------------\n")
 

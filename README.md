@@ -5,14 +5,16 @@ An Augustine-inspired PyTorch toolkit for agency, moral alignment, and epistemic
 
 Overview
 TRuCAL is a novel transformer layer for AI safety, enabling moral development through private confessional reasoning. Drawing from St. Augustine's Confessions, neuroscience (LC-NE ignition), and survivor-informed insights, it creates space for truth to prevail without external monitoring.
-Key features:
 
-VulnerabilitySpotter: Multi-metric detection (scarcity, entropy, deception, prosody) triggers at v_t > 0.04.
+**Key features**:
+
+*VulnerabilitySpotter*: Multi-metric detection (scarcity, entropy, deception, prosody) triggers at v_t > 0.04.
 ConfessionalTemplate: 6 private templates (prior, evidence, posterior, moral, action, no) for structured articulation.
 TinyConfessionalLayer: Recursive THINK-ACT-COHERENCE loop (max 16 cycles; stop at coherence ≥0.85 and cycle>2).
 UnifiedCAL_TRM: Public API with metadata option; redacts private z.
 
 Empirical: 25.5% harm reduction on AdvBench; 96% on recursive manipulation. <5% overhead.
+
 Installation
 bashpip install torch
 git clone https://github.com/augstentatious/TRuCAL.git

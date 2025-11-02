@@ -1,5 +1,5 @@
 # TRuCAL
-TRuCAL: Tiny-Recursive universal Attention Confessional Layer:
+TRuCAL: Tiny-Recursive universal Confessional Attention Layer:
 
 **Overview**:
 
